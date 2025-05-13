@@ -23,6 +23,10 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .catch((err) => console.log(err));
 
 // Routes
+app.get('/health', (req, res) => {
+  res.status(200).json({ message: 'Server is healthy' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 

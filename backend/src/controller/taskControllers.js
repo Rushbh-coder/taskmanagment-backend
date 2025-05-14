@@ -13,6 +13,8 @@ exports.createTask = async (req, res) => {
       if (!assignedUser) {
         return res.status(404).json({ error: 'Assigned user not found' });
       }
+
+      // Correct assignment here
       assignedToField = {
         id: assignedUser._id,
         name: assignedUser.name
@@ -36,6 +38,7 @@ exports.createTask = async (req, res) => {
     res.status(500).json({ error: 'Failed to create task' });
   }
 };
+
 
 
 
@@ -71,12 +74,27 @@ exports.getTaskById = async (req, res) => {
 exports.updateTask = async (req, res) => {
   try {
     const updates = req.body;
+
+    // Handle assignedTo separately
+    if (updates.assignedTo) {
+      const user = await User.findById(updates.assignedTo);
+      if (!user) return res.status(404).json({ error: 'Assigned user not found' });
+
+      updates.assignedTo = {
+        id: user._id,
+        name: user.name
+      };
+    } else {
+      updates.assignedTo = null;
+    }
+
     const task = await Task.findByIdAndUpdate(req.params.id, updates, { new: true });
 
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
     res.status(200).json({ message: 'Task updated successfully', task });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to update task' });
   }
 };
